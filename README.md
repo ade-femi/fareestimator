@@ -201,6 +201,14 @@ travel fee = driving distance (miles) × price per mile
 ```
 
 - **Driving distance only** — real road distance from the Routes API, never straight-line.
+- **Toll-free routing** — requests set `routeModifiers.avoidTolls`, so the distance is
+  measured along a route that avoids tolls. This is a preference, not a guarantee: where
+  no toll-free path exists (a tolled bridge is the only crossing), Google returns the best
+  route it can. Avoiding tolls can lengthen a trip, which raises the fee and can push a
+  borderline address outside the radius. The flag is `AVOID_TOLLS` in
+  `src/lib/google/routes.ts`.
+- **One route per request** — alternative routes are not requested, so the fee always
+  comes from Google's single recommended route under those preferences.
 - **Miles**, rounded to one decimal for display.
 - **Fee rounded to two decimals**, with `Number.EPSILON` correction so values like
   `1.005` round the way a human expects.
@@ -211,6 +219,29 @@ travel fee = driving distance (miles) × price per mile
 
 The logic lives in `src/lib/fee.ts`: pure functions with no database, network or
 framework imports, covered by 23 unit tests.
+
+### Ambiguous addresses
+
+When one address string could match several real places ("100 Main St" existing in three
+towns in the same state), behaviour depends on how the customer entered it:
+
+- **Via autocomplete** — the customer resolves the ambiguity themselves by choosing one
+  suggestion from the list. Google expands that specific place into street, city, state
+  and ZIP, and those four fields are what get priced. The ZIP in particular pins the
+  result down.
+- **Typed manually** — the four fields are joined into one string and sent to Google,
+  which geocodes it and silently uses its best match. The customer is not asked to
+  choose. In practice a complete street + city + state + ZIP is rarely ambiguous, and a
+  wrong ZIP usually fails geocoding outright rather than matching the wrong place — the
+  customer then sees "We couldn't find that address".
+
+So a genuinely ambiguous _manual_ entry yields Google's top interpretation with no
+warning. If that matters for your service area, the strictest fix is to require a
+suggestion to be selected: keep the `placeId` from
+`src/components/estimate/address-autocomplete.tsx`, send it with the form, and route on
+`{ placeId }` instead of `{ address }` in `computeDrivingRoute()` — the Routes API accepts
+either. The trade-off is that customers whose address Google doesn't list can no longer
+get an estimate, which is why the manual fields are the default today.
 
 ## Admin dashboard
 

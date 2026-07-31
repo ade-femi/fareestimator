@@ -7,9 +7,10 @@ import { metersToMiles } from '@/lib/fee';
 /**
  * Google Routes API client.
  *
- * Used ONLY to obtain driving distance and duration. The app never loads the
- * Maps JavaScript SDK, never renders a map, and never returns coordinates or
- * route geometry to the browser.
+ * Used ONLY to obtain driving distance and duration, for a route that avoids
+ * tolls where one exists. The app never loads the Maps JavaScript SDK, never
+ * renders a map, and never returns coordinates or route geometry to the
+ * browser.
  */
 
 const ROUTES_ENDPOINT = 'https://routes.googleapis.com/directions/v2:computeRoutes';
@@ -18,6 +19,20 @@ const ROUTES_ENDPOINT = 'https://routes.googleapis.com/directions/v2:computeRout
 const FIELD_MASK = 'routes.distanceMeters,routes.duration';
 
 const REQUEST_TIMEOUT_MS = 10_000;
+
+/**
+ * Ask Google for a toll-free route.
+ *
+ * This is a *preference*, not a guarantee: where no toll-free path exists (a
+ * tolled bridge or tunnel is the only crossing), Google still returns the best
+ * route it can rather than failing. Avoiding tolls can also make a trip longer,
+ * which raises the distance-based fee and can push a borderline destination
+ * outside the service radius.
+ *
+ * Promote this to a Settings column if the business ever needs it per-region;
+ * the cache key below already accounts for the flag.
+ */
+const AVOID_TOLLS = true;
 
 export interface RouteResult {
   distanceMeters: number;
@@ -38,7 +53,9 @@ interface ComputeRoutesResponse {
 const routeCache = createSharedCache<RouteResult>('routes', 60 * 60 * 1000, 1000);
 
 const cacheKey = (origin: string, destination: string) =>
-  `${origin.toLowerCase().trim()}|${destination.toLowerCase().trim()}`;
+  // The routing preference is part of the key so a change to AVOID_TOLLS can
+  // never be served a distance computed under the old preference.
+  `${origin.toLowerCase().trim()}|${destination.toLowerCase().trim()}|tolls:${AVOID_TOLLS ? 'avoid' : 'allow'}`;
 
 /** Parses the protobuf duration string ("3742s") into seconds. */
 function parseDuration(duration: string | undefined): number {
@@ -91,6 +108,9 @@ export async function computeDrivingRoute(
         // Routes Basic" SKU; travel fees are distance-based, so live traffic
         // would only add cost and non-determinism.
         routingPreference: 'TRAFFIC_UNAWARE',
+        routeModifiers: {
+          avoidTolls: AVOID_TOLLS,
+        },
         units: 'IMPERIAL',
         languageCode: 'en-US',
         regionCode: 'US',
@@ -141,6 +161,8 @@ export async function computeDrivingRoute(
   }
 
   const data = (await response.json()) as ComputeRoutesResponse;
+  // `computeAlternativeRoutes` is left off, so Google returns exactly one route:
+  // its recommended route under the preferences above (driving, toll-avoiding).
   const route = data.routes?.[0];
 
   if (!route || typeof route.distanceMeters !== 'number') {
