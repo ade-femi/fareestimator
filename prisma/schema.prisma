@@ -1,0 +1,64 @@
+// Prisma schema for the Travel Fee Estimator.
+//
+// The `provider` below targets SQLite so development works with zero setup.
+// For production (PostgreSQL on Supabase/Neon) run:
+//
+//   npm run db:provider postgresql
+//   npx prisma migrate dev --name init
+//
+// See DEPLOYMENT.md for the full walkthrough.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Administrators of the dashboard. Passwords are stored as bcrypt hashes only.
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  passwordHash String
+  role         String    @default("admin")
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([email])
+}
+
+/// Singleton row holding every configurable business value.
+/// Nothing in this table is ever returned by a public endpoint except the
+/// explicitly public branding fields (company name, colour, contact details)
+/// and the travel fee explanation.
+model Settings {
+  id String @id @default("singleton")
+
+  // --- Private: never leaves the server ---
+  originAddress String
+
+  // --- Pricing ---
+  pricePerMile    Float @default(0.8)
+  minimumFee      Float @default(30)
+  maxRadiusMiles  Float @default(100)
+
+  // --- Customer-facing copy ---
+  feeExplanation String @default("Travel fees help cover fuel, travel time, vehicle wear, and transportation expenses required to provide services at your location.")
+  outsideAreaMessage String @default("We're sorry, this destination is currently outside our normal service area. Please contact us directly to discuss your project.")
+  displayPricePerMile Boolean @default(false)
+
+  // --- Branding ---
+  companyName  String  @default("Travel Fee Estimator")
+  companyLogo  String?
+  brandColor   String  @default("#0f172a")
+  contactPhone String?
+  contactEmail String?
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
