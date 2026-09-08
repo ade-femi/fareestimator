@@ -53,7 +53,7 @@ export async function getSettings(): Promise<Settings> {
     data: {
       id: SETTINGS_ID,
       originAddress: process.env.SEED_ORIGIN_ADDRESS ?? '',
-      pricePerMile: Number(process.env.SEED_PRICE_PER_MILE ?? 0.8),
+      pricePerMile: Number(process.env.SEED_PRICE_PER_MILE ?? 3),
       minimumFee: Number(process.env.SEED_MINIMUM_FEE ?? 30),
       maxRadiusMiles: Number(process.env.SEED_MAX_RADIUS_MILES ?? 100),
       feeExplanation: DEFAULT_FEE_EXPLANATION,

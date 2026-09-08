@@ -152,7 +152,7 @@ All variables are **server-only** — none are prefixed `NEXT_PUBLIC_`. See
 | `NEXTAUTH_URL`, `AUTH_TRUST_HOST`               | prod     | Set automatically on Vercel        |
 | `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`       | seed     | First administrator                |
 | `SEED_ORIGIN_ADDRESS`                           | seed     | Business address (private)         |
-| `SEED_PRICE_PER_MILE`, `SEED_MINIMUM_FEE`       | seed     | Defaults: `0.80`, `30.00`          |
+| `SEED_PRICE_PER_MILE`, `SEED_MINIMUM_FEE`       | seed     | Defaults: `3.00`, `30.00`          |
 | `SEED_MAX_RADIUS_MILES`                         | seed     | Default `100`                      |
 | `RATE_LIMIT_MAX_REQUESTS`, `..._WINDOW_SECONDS` | no       | Defaults: 15 requests / 60 seconds |
 
@@ -213,7 +213,7 @@ travel fee = driving distance (miles) × price per mile
 - **Fee rounded to two decimals**, with `Number.EPSILON` correction so values like
   `1.005` round the way a human expects.
 - **Minimum travel fee** — every customer pays at least this amount. Default **$30.00**:
-  a 12-mile trip at $0.80/mile computes to $9.60 and is charged at $30.00.
+  an 8-mile trip at $3.00/mile computes to $24.00 and is charged at $30.00.
 - **Maximum service radius** — beyond it, no fee is calculated at all and the customer
   sees your out-of-area message. Set to `0` for no limit.
 

@@ -91,7 +91,7 @@ In Vercel: _Project → Settings → Environment Variables_. Add each of these f
 | `SEED_ADMIN_EMAIL`      | Your admin email                               |
 | `SEED_ADMIN_PASSWORD`   | A strong password (change after first sign-in) |
 | `SEED_ORIGIN_ADDRESS`   | Your business address                          |
-| `SEED_PRICE_PER_MILE`   | e.g. `0.80`                                    |
+| `SEED_PRICE_PER_MILE`   | e.g. `3.00`                                    |
 | `SEED_MINIMUM_FEE`      | e.g. `30.00`                                   |
 | `SEED_MAX_RADIUS_MILES` | e.g. `100`                                     |
 

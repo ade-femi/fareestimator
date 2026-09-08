@@ -42,7 +42,7 @@ model Settings {
   originAddress String
 
   // --- Pricing ---
-  pricePerMile    Float @default(0.8)
+  pricePerMile    Float @default(3)
   minimumFee      Float @default(30)
   maxRadiusMiles  Float @default(100)
 
