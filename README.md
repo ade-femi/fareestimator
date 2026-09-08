@@ -78,7 +78,7 @@ nothing about a customer's destination is written to the database.
 | Styling    | Tailwind CSS, shadcn/ui-style components, Radix UI   |
 | Forms      | React Hook Form + Zod (same schemas client & server) |
 | Backend    | Next.js Route Handlers + Server Actions              |
-| Database   | Prisma ORM — SQLite (dev), PostgreSQL (prod)         |
+| Database   | Prisma ORM — PostgreSQL                              |
 | Auth       | Auth.js (NextAuth v5), JWT sessions, bcrypt          |
 | Maps       | Google Routes API + Places API (New), server-side    |
 | Tests      | Vitest                                               |
@@ -86,7 +86,12 @@ nothing about a customer's destination is written to the database.
 
 ## Quick start
 
-Requires Node.js 20+.
+**Deploying for a business, not developing the code?** Skip straight to
+[DEPLOYMENT.md](./DEPLOYMENT.md) — it's a "Deploy to Vercel" button and a form, no
+command line required.
+
+To run the code locally, you need Node.js 20+ and a PostgreSQL database (a free
+Neon or Supabase project works fine — see [DEPLOYMENT.md](./DEPLOYMENT.md#1-create-a-postgresql-database)):
 
 ```bash
 git clone <your-repo-url>
@@ -94,7 +99,8 @@ cd fareestimator
 npm install
 
 cp .env.example .env
-# Fill in AUTH_SECRET and GOOGLE_MAPS_API_KEY, then set SEED_ORIGIN_ADDRESS.
+# Fill in DATABASE_URL (your Postgres connection string), AUTH_SECRET and
+# GOOGLE_MAPS_API_KEY, then set SEED_ORIGIN_ADDRESS.
 # Generate a secret with: openssl rand -base64 32
 
 npm run setup     # prisma generate + db push + seed
@@ -107,17 +113,17 @@ Open <http://localhost:3000>. The admin dashboard is at
 
 ### Useful scripts
 
-| Command                          | Purpose                                   |
-| -------------------------------- | ----------------------------------------- |
-| `npm run dev`                    | Development server                        |
-| `npm run build` / `npm start`    | Production build and server               |
-| `npm test`                       | Unit tests (fee calculation)              |
-| `npm run typecheck`              | TypeScript, no emit                       |
-| `npm run lint` / `format`        | ESLint / Prettier                         |
-| `npm run db:migrate`             | Create and apply a migration              |
-| `npm run db:seed`                | Seed admin user and settings (idempotent) |
-| `npm run db:studio`              | Browse the database                       |
-| `npm run db:provider postgresql` | Switch the Prisma datasource for prod     |
+| Command                                    | Purpose                                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `npm run dev`                              | Development server                                                                    |
+| `npm run build` / `npm start`              | Production build and server                                                           |
+| `npm test`                                 | Unit tests (fee calculation)                                                          |
+| `npm run typecheck`                        | TypeScript, no emit                                                                   |
+| `npm run lint` / `format`                  | ESLint / Prettier                                                                     |
+| `npm run db:migrate`                       | Create and apply a migration                                                          |
+| `npm run db:seed`                          | Seed admin user and settings (idempotent)                                             |
+| `npm run db:studio`                        | Browse the database                                                                   |
+| `npm run db:provider <sqlite\|postgresql>` | Switch the Prisma datasource (rarely needed — the repo targets postgresql by default) |
 
 ## Google Cloud setup
 
@@ -143,18 +149,19 @@ per-IP rate limiting.
 All variables are **server-only** — none are prefixed `NEXT_PUBLIC_`. See
 [`.env.example`](./.env.example) for the annotated list.
 
-| Variable                                        | Required | Notes                              |
-| ----------------------------------------------- | -------- | ---------------------------------- |
-| `DATABASE_URL`                                  | yes      | SQLite file or Postgres URL        |
-| `DATABASE_PROVIDER`                             | yes      | `sqlite` or `postgresql`           |
-| `AUTH_SECRET`                                   | yes      | `openssl rand -base64 32`          |
-| `GOOGLE_MAPS_API_KEY`                           | yes      | Server key, Routes + Places        |
-| `NEXTAUTH_URL`, `AUTH_TRUST_HOST`               | prod     | Set automatically on Vercel        |
-| `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`       | seed     | First administrator                |
-| `SEED_ORIGIN_ADDRESS`                           | seed     | Business address (private)         |
-| `SEED_PRICE_PER_MILE`, `SEED_MINIMUM_FEE`       | seed     | Defaults: `3.00`, `30.00`          |
-| `SEED_MAX_RADIUS_MILES`                         | seed     | Default `100`                      |
-| `RATE_LIMIT_MAX_REQUESTS`, `..._WINDOW_SECONDS` | no       | Defaults: 15 requests / 60 seconds |
+| Variable                                        | Required | Notes                                         |
+| ----------------------------------------------- | -------- | --------------------------------------------- |
+| `DATABASE_URL`                                  | yes      | PostgreSQL connection string                  |
+| `DATABASE_PROVIDER`                             | yes      | `postgresql` (or `sqlite` for local dev only) |
+| `AUTH_SECRET`                                   | yes      | `openssl rand -base64 32`                     |
+| `GOOGLE_MAPS_API_KEY`                           | yes      | Server key, Routes + Places                   |
+| `NEXTAUTH_URL`, `AUTH_TRUST_HOST`               | prod     | Set automatically on Vercel                   |
+| `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`       | seed     | First administrator                           |
+| `SEED_ORIGIN_ADDRESS`                           | seed     | Business address (private)                    |
+| `SEED_PRICE_PER_MILE`, `SEED_MINIMUM_FEE`       | seed     | Defaults: `3.00`, `30.00`                     |
+| `SEED_MAX_RADIUS_MILES`                         | seed     | Default `100`                                 |
+| `ALLOWED_EMBED_ORIGINS`                         | no       | Origins allowed to iframe the landing page    |
+| `RATE_LIMIT_MAX_REQUESTS`, `..._WINDOW_SECONDS` | no       | Defaults: 15 requests / 60 seconds            |
 
 Missing or malformed variables fail fast with a readable message (`src/lib/env.ts`).
 
