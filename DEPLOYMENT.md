@@ -8,30 +8,36 @@ but includes a monthly credit that covers typical estimator traffic.
 
 The repository already targets PostgreSQL and applies its own database migrations and
 seed data automatically as part of `npm run build` — the command Vercel runs on every
-deploy. There is nothing to run locally and no separate migration step: create the
-database, set the environment variables below, and deploy.
+deploy. There is nothing to run locally and no separate migration step. The database
+itself can be created inside Vercel's own dashboard (step 1) — no second account needed.
 
 ---
 
 ## 1. Create a PostgreSQL database
 
-Either provider works; both have a free tier. Do this first so you have a `DATABASE_URL`
-ready for step 3.
+**Recommended — do this from inside Vercel, one account total:** after importing the
+project in step 3, open the project's **Storage** tab → **Create Database** → choose a
+Postgres option (Vercel lists a couple of managed providers here, e.g. Neon). Attaching
+it automatically sets `DATABASE_URL` for you — you can skip typing it in manually in
+step 4. No second signup, no separate dashboard to remember.
 
-**Neon** (<https://neon.tech>) — create a project, copy the **pooled** connection string.
+**Alternative — a standalone database**, useful if you might move the app off Vercel
+later, or already have a provider you prefer:
 
-**Supabase** (<https://supabase.com>) — create a project, then _Project Settings →
-Database → Connection string → URI_. Use the **connection pooler** string (port `6543`)
-for the app.
+- **Neon** (<https://neon.tech>) — create a project, copy the **pooled** connection string.
+- **Supabase** (<https://supabase.com>) — create a project, then _Project Settings →
+  Database → Connection string → URI_. Use the **connection pooler** string (port
+  `6543`).
 
-Your `DATABASE_URL` will look like:
+Either way, a pooled `DATABASE_URL` looks like:
 
 ```
 postgresql://user:password@host:6543/dbname?sslmode=require&pgbouncer=true
 ```
 
 > Serverless functions open many short-lived connections. Always use the pooled
-> connection string, or you will exhaust the connection limit under load.
+> connection string, or you will exhaust the connection limit under load. Vercel's own
+> Postgres integration handles this for you automatically.
 
 ## 2. Get a Google Maps API key
 
@@ -64,20 +70,20 @@ If you didn't use the deploy button, or need to change a value later: Vercel →
 _Project → Settings → Environment Variables_. Add each of these for **Production**
 (and Preview, if you use preview deployments):
 
-| Variable                | Value                                                    |
-| ----------------------- | -------------------------------------------------------- |
-| `DATABASE_URL`          | Pooled PostgreSQL connection string from step 1          |
-| `DATABASE_PROVIDER`     | `postgresql`                                             |
-| `AUTH_SECRET`           | `openssl rand -base64 32`, or any long random string     |
-| `AUTH_TRUST_HOST`       | `true`                                                   |
-| `GOOGLE_MAPS_API_KEY`   | Your server key from step 2                              |
-| `SEED_ADMIN_EMAIL`      | Your admin email                                         |
-| `SEED_ADMIN_PASSWORD`   | A strong password (change after first sign-in)           |
-| `SEED_ORIGIN_ADDRESS`   | Your business address                                    |
-| `SEED_PRICE_PER_MILE`   | e.g. `3.00`                                              |
-| `SEED_MINIMUM_FEE`      | e.g. `30.00`                                             |
-| `SEED_MAX_RADIUS_MILES` | e.g. `100`                                               |
-| `ALLOWED_EMBED_ORIGINS` | Sites allowed to embed this page, e.g. your main website |
+| Variable                | Value                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------ |
+| `DATABASE_URL`          | Auto-filled if you used Vercel's Storage tab; otherwise the pooled connection string from step 1 |
+| `DATABASE_PROVIDER`     | `postgresql`                                                                                     |
+| `AUTH_SECRET`           | `openssl rand -base64 32`, or any long random string                                             |
+| `AUTH_TRUST_HOST`       | `true`                                                                                           |
+| `GOOGLE_MAPS_API_KEY`   | Your server key from step 2                                                                      |
+| `SEED_ADMIN_EMAIL`      | Your admin email                                                                                 |
+| `SEED_ADMIN_PASSWORD`   | A strong password (change after first sign-in)                                                   |
+| `SEED_ORIGIN_ADDRESS`   | Your business address                                                                            |
+| `SEED_PRICE_PER_MILE`   | e.g. `3.00`                                                                                      |
+| `SEED_MINIMUM_FEE`      | e.g. `30.00`                                                                                     |
+| `SEED_MAX_RADIUS_MILES` | e.g. `100`                                                                                       |
+| `ALLOWED_EMBED_ORIGINS` | Sites allowed to embed this page, e.g. your main website                                         |
 
 `NEXTAUTH_URL` is not needed on Vercel — `AUTH_TRUST_HOST=true` handles it.
 
