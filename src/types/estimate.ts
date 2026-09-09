@@ -11,6 +11,7 @@ export interface EstimateSuccessResponse {
   durationSeconds: number;
   durationText: string;
   travelFee: number;
+  minimumFee: number;
   minimumFeeApplied: boolean;
   pricePerMile: number | null;
   feeExplanation: string;

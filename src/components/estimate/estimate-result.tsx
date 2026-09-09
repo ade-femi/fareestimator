@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Info, Route, Wallet } from 'lucide-react';
+import { Info, Route, Wallet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { formatCurrency } from '@/lib/fee';
@@ -9,8 +9,8 @@ import type { EstimateResponse } from '@/types/estimate';
 /**
  * Read-only summary of a completed estimate.
  *
- * Shows distance, drive time and fee only — there is deliberately no map, no
- * route, no coordinates and no reference to where the trip starts.
+ * Shows distance and fee only — there is deliberately no map, no route, no
+ * coordinates and no reference to where the trip starts.
  */
 export function EstimateResult({ estimate }: { estimate: EstimateResponse }) {
   if (estimate.outsideServiceArea) {
@@ -33,13 +33,8 @@ export function EstimateResult({ estimate }: { estimate: EstimateResponse }) {
         <CardContent className="divide-y divide-border p-0">
           <SummaryRow
             icon={<Route className="h-5 w-5" aria-hidden="true" />}
-            label="Estimated Driving Distance"
+            label="Estimated Round-Trip Distance"
             value={estimate.distanceText}
-          />
-          <SummaryRow
-            icon={<Clock className="h-5 w-5" aria-hidden="true" />}
-            label="Estimated Drive Time"
-            value={estimate.durationText}
           />
           <SummaryRow
             icon={<Wallet className="h-5 w-5" aria-hidden="true" />}
@@ -53,10 +48,15 @@ export function EstimateResult({ estimate }: { estimate: EstimateResponse }) {
           <div className="border-t border-border bg-muted/40 px-6 py-3 text-xs text-muted-foreground">
             {estimate.pricePerMile !== null && (
               <span>
-                Calculated at {formatCurrency(estimate.pricePerMile)} per mile.{' '}
+                Calculated at {formatCurrency(estimate.pricePerMile)} per mile round
+                trip.{' '}
               </span>
             )}
-            {estimate.minimumFeeApplied && <span>Our minimum travel fee applies.</span>}
+            {estimate.minimumFeeApplied && (
+              <span>
+                Our minimum travel fee of {formatCurrency(estimate.minimumFee)} applies.
+              </span>
+            )}
           </div>
         )}
       </Card>
