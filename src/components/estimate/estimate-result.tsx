@@ -1,6 +1,6 @@
 'use client';
 
-import { Info, Route, Wallet } from 'lucide-react';
+import { ArrowLeftRight, Info, Route, Wallet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { formatCurrency } from '@/lib/fee';
@@ -33,8 +33,13 @@ export function EstimateResult({ estimate }: { estimate: EstimateResponse }) {
         <CardContent className="divide-y divide-border p-0">
           <SummaryRow
             icon={<Route className="h-5 w-5" aria-hidden="true" />}
-            label="Estimated Round-Trip Distance"
-            value={estimate.distanceText}
+            label="One-Way Distance"
+            value={estimate.oneWayDistanceText}
+          />
+          <SummaryRow
+            icon={<ArrowLeftRight className="h-5 w-5" aria-hidden="true" />}
+            label="Round-Trip Distance (to & fro)"
+            value={estimate.roundTripDistanceText}
           />
           <SummaryRow
             icon={<Wallet className="h-5 w-5" aria-hidden="true" />}
@@ -48,8 +53,9 @@ export function EstimateResult({ estimate }: { estimate: EstimateResponse }) {
           <div className="border-t border-border bg-muted/40 px-6 py-3 text-xs text-muted-foreground">
             {estimate.pricePerMile !== null && (
               <span>
-                Calculated at {formatCurrency(estimate.pricePerMile)} per mile round
-                trip.{' '}
+                We charge for the round trip: {estimate.oneWayDistanceText} one-way ×
+                2 = {estimate.roundTripDistanceText}, at{' '}
+                {formatCurrency(estimate.pricePerMile)} per mile.{' '}
               </span>
             )}
             {estimate.minimumFeeApplied && (

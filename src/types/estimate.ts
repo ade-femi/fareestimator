@@ -6,8 +6,10 @@
  */
 export interface EstimateSuccessResponse {
   outsideServiceArea: false;
-  distanceMiles: number;
-  distanceText: string;
+  oneWayDistanceMiles: number;
+  oneWayDistanceText: string;
+  roundTripDistanceMiles: number;
+  roundTripDistanceText: string;
   durationSeconds: number;
   durationText: string;
   travelFee: number;

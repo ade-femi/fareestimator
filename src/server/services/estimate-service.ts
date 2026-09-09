@@ -1,7 +1,7 @@
 import 'server-only';
 import { getSettings } from '@/lib/settings';
 import { computeDrivingRoute } from '@/lib/google/routes';
-import { calculateTravelFee, formatDuration } from '@/lib/fee';
+import { calculateTravelFee, formatDistance, formatDuration } from '@/lib/fee';
 import { formatDestination, type DestinationInput } from '@/lib/validation';
 
 /**
@@ -18,8 +18,10 @@ import { formatDestination, type DestinationInput } from '@/lib/validation';
 
 export interface EstimateSuccess {
   outsideServiceArea: false;
-  distanceMiles: number;
-  distanceText: string;
+  oneWayDistanceMiles: number;
+  oneWayDistanceText: string;
+  roundTripDistanceMiles: number;
+  roundTripDistanceText: string;
   durationSeconds: number;
   durationText: string;
   travelFee: number;
@@ -81,8 +83,10 @@ export async function createEstimate(
 
   return {
     outsideServiceArea: false,
-    distanceMiles: calculation.distanceMiles,
-    distanceText: `${calculation.distanceMiles.toFixed(1)} miles`,
+    oneWayDistanceMiles: route.distanceMiles,
+    oneWayDistanceText: formatDistance(route.distanceMiles),
+    roundTripDistanceMiles: calculation.distanceMiles,
+    roundTripDistanceText: formatDistance(calculation.distanceMiles),
     durationSeconds: route.durationSeconds,
     durationText: formatDuration(route.durationSeconds),
     travelFee: calculation.travelFee,
